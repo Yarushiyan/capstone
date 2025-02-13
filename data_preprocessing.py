@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
+import joblib
 
 # Load dataset
 data = pd.read_csv("used_electronics.csv")
@@ -15,6 +16,9 @@ for column in ['brand', 'model', 'condition']:
     le = LabelEncoder()
     data[column] = le.fit_transform(data[column])
     label_encoders[column] = le
+
+# Save the label encoders
+joblib.dump(label_encoders, "label_encoders.pkl")
 
 # Split data into features and target
 X = data[['brand', 'model', 'condition', 'age']]
