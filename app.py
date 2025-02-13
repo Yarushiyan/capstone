@@ -2,28 +2,41 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# Load the trained model
+# Load the trained model and label encoders
 model = joblib.load("price_predictor_model.pkl")
+label_encoders = joblib.load("label_encoders.pkl")
 
 # Streamlit app
 st.title("Used Electronics Price Predictor")
 
 # Input fields
 st.header("Enter Product Details")
-brand = st.selectbox("Brand", ["Apple", "Samsung", "Google", "Sony", "Other"])
-model_name = st.text_input("Model")
-condition = st.selectbox("Condition", ["New", "Like New", "Good", "Fair", "Poor"])
+
+# Brand dropdown
+brand_options = label_encoders['brand'].classes_.tolist()
+brand = st.selectbox("Brand", brand_options)
+
+# Model dropdown
+model_options = label_encoders['model'].classes_.tolist()
+model_name = st.selectbox("Model", model_options)
+
+# Condition dropdown
+condition_options = label_encoders['condition'].classes_.tolist()
+condition = st.selectbox("Condition", condition_options)
+
+# Age input
 age = st.number_input("Age (in years)", min_value=0, max_value=10)
 
-# Encode inputs
-brand_encoded = 0 if brand == "Apple" else 1 if brand == "Samsung" else 2 if brand == "Google" else 3 if brand == "Sony" else 4
-condition_encoded = 0 if condition == "New" else 1 if condition == "Like New" else 2 if condition == "Good" else 3 if condition == "Fair" else 4
+# Encode inputs using the saved label encoders
+brand_encoded = label_encoders['brand'].transform([brand])[0]
+model_encoded = label_encoders['model'].transform([model_name])[0]
+condition_encoded = label_encoders['condition'].transform([condition])[0]
 
 # Predict price
 if st.button("Predict Price"):
     input_data = pd.DataFrame({
         'brand': [brand_encoded],
-        'model': [model_name],
+        'model': [model_encoded],
         'condition': [condition_encoded],
         'age': [age]
     })
